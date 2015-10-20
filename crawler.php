@@ -1,7 +1,7 @@
 <?php
 /**
  * @link http://simplehtmldom.sourceforge.net/
-*/
+ */
 require_once("simple_html_dom.php");
 
 abstract class request{
@@ -45,6 +45,11 @@ class pageList{
     */
     public static $filename;
     
+    /**
+     * Constructor initializes object properties
+     * @param int $count ($argc)
+     * @param array $args ($argv)
+     */
     public function __construct($count, $args) {
         if($count !== 4){
             echo "Usage:\nphp ".$args[0]." city state filename\n";
@@ -56,6 +61,9 @@ class pageList{
         $this->pgcity = str_replace(" ","-",self::$city);
         
     }
+    /**
+     * Start the pages requests
+     */
     public function main(){
         for($i = 1; $i < 3; $i++){
             if($i == 1){
@@ -70,7 +78,10 @@ class pageList{
             $this->parsePage($html);
         }
     }
-    
+    /**
+     * Start and syncronize the threads
+     * @param simple_html_dom $html
+     */
     public function parsePage($html){
         $worker = 0;
         $tasks = array();
@@ -96,12 +107,18 @@ class pageList{
 class subPage extends Thread{
     protected $list;
 
-    
+    /**
+     * Constructor initializes $list property and start the thread 
+     * @param simple_html_dom $list
+     */
     public function __construct($list) {
         $this->list = $list;
         $this->start();
     }
     
+    /**
+     * Run the thread and save the result in a file
+     */
     public function run(){
         $list = $this->list;
         $anchor = $list->find('h2.biz-card-title a', 0);
@@ -132,10 +149,24 @@ class subPage extends Thread{
         fwrite($fp,trim($nome).",".$address.",".$cep.",".trim($tel).",".$website.",".$delivery."\n");
         fclose($fp);
     }
+    
+    /**
+     * Check if html element exists
+     * @param simple_html_dom $html
+     * @access protected
+     * @return string
+     */
     protected function hasDelivery($html){
         $deldiv = $html->find('div.kekantodelivery-info',0);
         return $deldiv == null ? "N":"S";
     }
+    
+    /**
+     * Check if the restaurant has a website and returns it
+     * @param simple_html_dom $html
+     * @access protected
+     * @return string
+     */
     protected function getWebsite($html){
         $add = $html->find("div.biz-additional-info",0);
         if($add !== null){
@@ -152,6 +183,13 @@ class subPage extends Thread{
         }
         return "N/A";
     }
+    
+    /**
+     * Check if the post code is available and returns it
+     * @param simple_html_dom $html
+     * @access protected
+     * @return string
+     */
     protected function getCEP($html){
         $address = $html->find("address",0);
         if($address != null){
@@ -164,6 +202,12 @@ class subPage extends Thread{
         }
         return "00000-000";
     }
+    /**
+     * Check if the telephone is available and returns it
+     * @param simple_html_dom $html
+     * @access protected
+     * @return string
+     */
     protected function getPhone($html){
         $phone = $this->list->find("div.biz-card-phone",0);
         return $phone == null ? "N/A":$phone->plaintext;
