@@ -1,8 +1,15 @@
 <?php
-
+/**
+ * @link http://simplehtmldom.sourceforge.net/
+*/
 require_once("simple_html_dom.php");
 
 abstract class request{
+    /**
+     * Return a simple_html_dom object or false
+     * @param string $page the url of the page 
+     * @return simple_html_dom|boolean
+     */
     public static function getPage($page){
         $html = file_get_html($page);
         if(!$html){
@@ -13,13 +20,33 @@ abstract class request{
 }
 
 class pageList{
+    /**
+    * The name of the city that will be used on the url
+    * @var string
+    * @access protected
+    */
     protected $pgcity;
+    /**
+    * The name of the State in Brazil (abbreviated)
+    * @var string
+    * @static
+    */
     public static $state;
+    /**
+    * The name of the city
+    * @var string
+    * @static
+    */
     public static $city;
+    /**
+    * The name of the file where the search results will be copied
+    * @var string
+    * @static
+    */
     public static $filename;
     
-    public function __construct($args) {
-        if(count($args) !== 4){
+    public function __construct($count, $args) {
+        if($count !== 4){
             echo "Usage:\nphp ".$args[0]." city state filename\n";
             exit;
         }
@@ -143,5 +170,5 @@ class subPage extends Thread{
     }
 }
 
-$pages = new pageList($argv);
+$pages = new pageList($argc,$argv);
 $pages->main();
